@@ -1,4 +1,4 @@
-import * as config from '../config';
+import * as config from '../../config';
 import { generateRandomString, parseHashParams, Storage } from '../utils';
 
 class Auth {

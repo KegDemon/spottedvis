@@ -1,6 +1,6 @@
 import Axios, { AxiosAdapter } from 'axios';
 import { Auth } from '../auth/auth';
-import * as config from '../config';
+import * as config from '../../config';
 import { Storage } from '../utils';
 
 class AudioAnalysisService {
