@@ -1,30 +1,39 @@
-import { CLIENT_ID, REDIRECT_URI, SPOTIFY_LOGIN_PATH, UID_TOKEN_KEY } from '../config';
+import * as config from '../config';
 import { generateRandomString, parseHashParams, Storage } from '../utils';
 
 class Auth {
-  private authURL: string = SPOTIFY_LOGIN_PATH;
+  private authURL: string = config.SPOTIFY_LOGIN_PATH;
   private authScopes: String[] = [
     'user-read-playback-state',
+    'user-read-currently-playing'
   ];
-  private clientId: string = CLIENT_ID;
+  private clientId: string = config.CLIENT_ID;
   private parseHash: Function = parseHashParams;
-  private redirectUri: string = REDIRECT_URI;
+  private redirectUri: string = config.REDIRECT_URI;
   private state: string = generateRandomString(16);
   private storage: Storage = new Storage();
-  private uidTokenKey: string = UID_TOKEN_KEY;
+  private uidStateKey: string = config.UID_STATE_KEY;
+  private uidTokenKey: string = config.UID_TOKEN_KEY;
+  private uidTokenExpiryKey: string = config.UID_TOKEN_EXPIRY_KEY
   private url: string = `${this.authURL}?client_id=${this.clientId}&response_type=token&scope=${this.authScopes.join('%20')}&redirect_uri=${this.redirectUri}&state=${this.state}`;
 
-  public login(): void {
-    this.storage.set('state', this.state);
-    this.redirect();
-
-    return void 0;
+  constructor() {
+    this.init();
   }
 
-  public isLoggedIn(): boolean {
+  private init(): void {
+    const hash = this.parseHash();
+    const state = this.storage.get(this.uidStateKey);
 
+    if (hash && hash.state === state) {
+      this.storage.remove(this.uidStateKey);
+      this.storage.set(this.uidTokenExpiryKey, new Date(new Date().getTime() + (hash.expires_in * 1000)).getTime());
+      this.storage.set(this.uidTokenKey, hash.access_token);
 
-    return !!this.storage.get(this.uidTokenKey);
+      window.location.href = this.redirectUri;
+    }
+
+    return void 0;
   }
 
   private redirect(): void {
@@ -32,7 +41,16 @@ class Auth {
     return void 0;
   }
 
+  public login(): void {
+    this.storage.set(this.uidStateKey, this.state);
+    this.redirect();
+
+    return void 0;
+  }
+
+  public isLoggedIn(): boolean {
+    return !!(this.storage.get(this.uidTokenKey) && this.storage.get(this.uidTokenExpiryKey) > new Date().getTime());
+  }
 }
 
 export { Auth };
-
