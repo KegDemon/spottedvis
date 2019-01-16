@@ -8,3 +8,4 @@ export const UID_TOKEN_KEY = 'uid_token';
 export const UID_STATE_KEY = 'uid_state';
 export const UID_TOKEN_EXPIRY_KEY = 'uid_token_expiry';
 export const UID_TRACK_ID_KEY = 'uid_track_id';
+export const UID_TRACK_PITCH_KEY = 'uid_track_pitch';

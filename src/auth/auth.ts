@@ -2,11 +2,11 @@ import * as config from '../../config';
 import { generateRandomString, parseHashParams, Storage } from '../utils';
 
 class Auth {
-  private authURL: string = config.SPOTIFY_LOGIN_PATH;
   private authScopes: String[] = [
     'user-read-playback-state',
     'user-read-currently-playing'
   ];
+  private authURL: string = config.SPOTIFY_LOGIN_PATH;
   private clientId: string = config.CLIENT_ID;
   private parseHash: Function = parseHashParams;
   private redirectUri: string = config.REDIRECT_URI;
@@ -14,7 +14,9 @@ class Auth {
   private storage: Storage = new Storage();
   private uidStateKey: string = config.UID_STATE_KEY;
   private uidTokenKey: string = config.UID_TOKEN_KEY;
-  private uidTokenExpiryKey: string = config.UID_TOKEN_EXPIRY_KEY
+  private uidTokenExpiryKey: string = config.UID_TOKEN_EXPIRY_KEY;
+  private uidTrackIdKey: string = config.UID_TRACK_ID_KEY;
+  private uidTrackPitchKey: string = config.UID_TRACK_PITCH_KEY;
   private url: string = `${this.authURL}?client_id=${this.clientId}&response_type=token&scope=${this.authScopes.join('%20')}&redirect_uri=${this.redirectUri}&state=${this.state}`;
 
   constructor() {
@@ -46,6 +48,16 @@ class Auth {
     this.redirect();
 
     return void 0;
+  }
+
+  public logout(): void {
+    this.storage.remove(this.uidStateKey);
+    this.storage.remove(this.uidTokenExpiryKey);
+    this.storage.remove(this.uidTokenKey);
+    this.storage.remove(this.uidTrackIdKey);
+    this.storage.remove(this.uidTrackPitchKey);
+
+    window.location.href = this.redirectUri;
   }
 
   public isLoggedIn(): boolean {

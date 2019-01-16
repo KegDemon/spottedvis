@@ -1,13 +1,15 @@
 import Axios, { AxiosAdapter } from 'axios';
-import { Auth } from '../auth/auth';
 import * as config from '../../config';
+import { Auth } from '../auth/auth';
 import { Storage } from '../utils';
+import { AudioAnalysisService } from './audio-analysis.service';
 
 class PollingService {
   private axios: AxiosAdapter = Axios;
+  private audioAnalysis: AudioAnalysisService;
   private auth: Auth;
   private polling: any; // interval
-  private pollingTime: number = 10000; // time in ms
+  private pollingTime: number = 5000; // time in ms
   private storage: Storage;
   private uidTokenKey: string;
   private uidTrackIdKey: string;
@@ -16,6 +18,8 @@ class PollingService {
   constructor() {
     this.auth = new Auth();
     this.storage = new Storage();
+    this.audioAnalysis = new AudioAnalysisService();
+
     this.uidTokenKey = config.UID_TOKEN_KEY;
     this.uidTrackIdKey = config.UID_TRACK_ID_KEY;
     this.url = config.SPOTIFY_BASE_PATH;
@@ -48,24 +52,19 @@ class PollingService {
       });
 
     }, this.pollingTime);
-
-    return void 0;
   }
 
   private stopPolling(): void {
     clearInterval(this.polling);
-
-    return void 0;
   }
 
-  private parseData({data}: any) {
+  private parseData({data}: any): void {
     if (this.storage.get(this.uidTrackIdKey) === data.item.id) {
       return void 0;
     }
 
     this.storage.set(this.uidTrackIdKey, data.item.id);
-
-
+    const a = this.audioAnalysis.get();
   }
 }
 
