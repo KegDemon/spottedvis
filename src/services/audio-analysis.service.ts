@@ -43,10 +43,10 @@ class AudioAnalysisService {
 
   private parseData({data: {segments}}: any) {
     const parsedSegments = segments.reduce((acc: any, val: any): {} => {
-      acc[val.start] = val.pitches;
+      acc.push({s: val.start, d: val.pitches.map((val: Number) => Math.round(+val * 10))});
 
       return acc;
-    }, {});
+    }, []);
 
     this.storage.set(this.uidTrackPitchKey, parsedSegments);
   }
