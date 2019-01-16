@@ -74,6 +74,10 @@ class PollingService {
       this.visualizer.start();
     }
 
+    if (!data.is_playing) {
+      this.visualizer.stop();
+    }
+
     if (this.storage.get(this.uidTrackIdKey) === data.item.id) {
       return void 0;
     } else {
