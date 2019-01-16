@@ -1,0 +1,4 @@
+@function rem($number) {
+  $remSize: $number / 16;
+  @return #{$remSize}rem;
+}

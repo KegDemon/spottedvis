@@ -1,0 +1,84 @@
+@import 'utils';
+
+body, html {
+  background-color: #000;
+  color: #FFF;
+  height: 100%;
+  font-size: 16px;
+  margin: 0;
+  width: 100%;
+}
+
+.hide {
+  display: none !important;
+}
+
+.vis {
+  align-items: flex-end;
+  bottom: 0;
+  display: flex;
+  flex: 1 1 100%;
+  justify-content: space-evenly;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 50%;
+
+  > div {
+    align-items: center;
+    display: flex;
+    flex-direction: column-reverse;
+    width: calc(50vw / 12);
+
+    div {
+      background-color: green;
+      display: block;
+      height: rem(38);
+      margin-bottom: rem(4);
+      width: rem(12);
+
+      &:nth-of-type(n + 6) {
+        background-color: yellow;
+      }
+
+      &:nth-of-type(n + 9) {
+        background-color: red;
+      }
+    }
+  }
+}
+
+button {
+  background: none;
+  border-radius: rem(4);
+  border: rem(1) solid rgba(255, 255, 255, 0.4);
+  color: #FFF;
+  cursor: pointer;
+  font-weight: 200;
+  opacity: 0.4;
+  padding: rem(8) rem(12);
+  position: absolute;
+  top: rem(16);
+  transition: opacity 1s;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &#fullscreen {
+    right: rem(16);
+  }
+
+  &#logout {
+    left: rem(16);
+  }
+
+  &#login {
+    font-size: rem(32);
+    left: 50%;
+    opacity: 1;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    transition: none;
+  }
+}

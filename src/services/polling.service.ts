@@ -14,6 +14,7 @@ class PollingService {
   private uidProgressKey: string;
   private storage: Storage;
   private uidTokenKey: string;
+  private uidTrackDurationKey: string;
   private uidTrackIdKey: string;
   private url: string;
   private visualizer: Visualizer;
@@ -26,6 +27,7 @@ class PollingService {
 
     this.uidProgressKey = config.UID_PROGRESS_KEY;
     this.uidTokenKey = config.UID_TOKEN_KEY;
+    this.uidTrackDurationKey = config.UID_TRACK_DURATION_KEY;
     this.uidTrackIdKey = config.UID_TRACK_ID_KEY;
     this.url = config.SPOTIFY_BASE_PATH;
 
@@ -61,19 +63,25 @@ class PollingService {
 
   private stopPolling(): void {
     clearInterval(this.polling);
-    const a = this.visualizer.stop();
+    this.visualizer.stop();
   }
 
-  private parseData({data}: any): void {
+  private parseData({ data }: any): void {
     this.storage.set(this.uidProgressKey, data.progress_ms / 1000);
-    const b = this.visualizer.start();
+    this.storage.set(this.uidTrackDurationKey, data.item.duration_ms);
+
+    if (data.is_playing && !this.visualizer.isActive()) {
+      this.visualizer.start();
+    }
 
     if (this.storage.get(this.uidTrackIdKey) === data.item.id) {
       return void 0;
+    } else {
+      this.visualizer.stop();
     }
 
     this.storage.set(this.uidTrackIdKey, data.item.id);
-    const a = this.audioAnalysis.get();
+    this.audioAnalysis.get();
   }
 }
 

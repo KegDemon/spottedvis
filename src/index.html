@@ -2,56 +2,11 @@
 <html>
   <head>
     <title>SpottedViz</title>
-    <style>
-      /* Move to external sheet */
-      body, html {
-        background-color: #000;
-        color: #FFF;
-        height: 100%;
-        margin: 0;
-        width: 100%;
-      }
-
-      .hide {
-        display: none !important;
-      }
-
-      .vis {
-        align-items: flex-end;
-        bottom: 0;
-        display: flex;
-        flex: 1 1 100%;
-        justify-content: space-evenly;
-        position: absolute;
-        width: 100%;
-      }
-
-      .vis > div {
-        display: flex;
-        flex-direction: column-reverse;
-        width: calc(100vw / 13);
-      }
-
-      .vis > div div {
-        background-color: green;
-        display: block;
-        height: 50px;
-        margin-bottom: 4px;
-        width: 50px;
-      }
-
-      .vis > div div:nth-of-type(n + 6) {
-        background-color: yellow;
-      }
-
-      .vis > div div:nth-of-type(n + 9) {
-        background-color: red;
-      }
-    </style>
   </head>
   <body>
-    <button type="button" id="login">Login</button>
+    <button type="button" id="login">Spotify Login</button>
     <button type="button" id="logout" class="hide">Logout</button>
+    <button type="button" id="fullscreen" class="hide">Fullscreen</button>
 
     <div class="vis"></div>
   </body>

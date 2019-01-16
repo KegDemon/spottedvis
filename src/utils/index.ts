@@ -1,3 +1,4 @@
+export * from './fullscreen.util';
 export * from './parseHash.util';
-export * from './random-string.util';
+export * from './randomString.util';
 export * from './storage.util';
