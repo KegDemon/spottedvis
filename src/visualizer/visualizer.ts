@@ -46,7 +46,7 @@ class Visualizer {
           .selectAll('div')
           .data(data => Array(data))
           .enter()
-            .append('div');
+          .append('div');
     }, 500);
   }
 
