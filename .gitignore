@@ -1,0 +1,8 @@
+node_modules
+
+**/dist/*.html
+**/dist/*.js
+
+**/src/config.ts
+
+yarn-error.log
