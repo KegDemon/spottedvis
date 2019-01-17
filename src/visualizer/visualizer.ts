@@ -40,7 +40,7 @@ class Visualizer {
         const tickTest = t.reduce((prev: number, curr: any, idx: number, ref: any) =>
           Math.abs(curr.s - prog) < Math.abs(ref[prev].s - prog) ? idx : prev, 0);
 
-        if (tick < tickTest) {
+        if (tick > tickTest) {
           tick = tickTest;
         }
       }
