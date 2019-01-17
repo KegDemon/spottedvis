@@ -1,15 +1,5 @@
 @import 'utils';
 
-@keyframes animateUp {
-  from {
-    transform: scaleY(0);
-  }
-
-  to {
-    transform: scaleY(1);
-  }
-}
-
 body, html {
   background-color: #000;
   color: #FFF;
@@ -34,20 +24,20 @@ body, html {
   transform: translateX(-50%);
   width: 50%;
 
-  > div {
+  > div.node {
     align-items: center;
-    animation-fill-mode: forwards;
-    animation: animateUp 250ms;
     display: flex;
     flex-direction: column-reverse;
-    transform-origin: bottom left;
     width: calc(50vw / 12);
 
-    div {
-      background-color: green;
+    div.cell {
+      background-color: #3ae43a;
+      border-radius: rem(1.5);
+      box-shadow: inset 0px 0px 6px 2px rgba(0,0,0,0.7);
       display: block;
       height: rem(38);
       margin-bottom: rem(4);
+      opacity: 1;
       width: rem(12);
 
       &:nth-of-type(n + 6) {
@@ -56,6 +46,11 @@ body, html {
 
       &:nth-of-type(n + 9) {
         background-color: red;
+      }
+
+      &.hidden {
+        opacity: 0;
+        transition: opacity 1s;
       }
     }
   }

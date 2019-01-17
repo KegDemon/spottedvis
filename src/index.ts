@@ -10,6 +10,7 @@ class App {
   private loginBtn: any;
   private logoutBtn: any;
   private fullscreenBtn: any;
+  private vis: any;
 
   constructor() {
     this.auth = new Auth();
@@ -18,6 +19,7 @@ class App {
     this.logoutBtn = document.getElementById('logout');
     this.fullscreenBtn = document.getElementById('fullscreen');
     this.fullscreen = fullScreen;
+    this.vis = document.getElementsByClassName('vis')[0];
 
     this.init();
   }
@@ -27,10 +29,12 @@ class App {
       this.loginBtn.classList.add('hide');
       this.logoutBtn.classList.remove('hide');
       this.fullscreenBtn.classList.remove('hide');
+      this.vis.classList.remove('hide');
     } else {
       this.loginBtn.classList.remove('hide');
       this.logoutBtn.classList.add('hide');
       this.fullscreenBtn.classList.add('hide');
+      this.vis.classList.add('hide');
     }
 
     this.loginBtn.onclick = () => {

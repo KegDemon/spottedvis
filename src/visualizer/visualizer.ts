@@ -1,24 +1,25 @@
-import * as d3 from 'd3';
 import * as config from '../../config';
 import { Storage } from '../utils';
 
 class Visualizer {
-  private d3: typeof d3;
   private isRunning: boolean;
   private storage: Storage;
   private uidProgressKey: string;
   private uidTrackDurationKey: string;
   private uidTrackPitchKey: string;
 
+  private nodeCollection: HTMLCollection;
+
   private interval: any;
 
   constructor() {
-    this.d3 = d3;
     this.isRunning = false;
     this.storage = new Storage();
     this.uidProgressKey = config.UID_PROGRESS_KEY;
     this.uidTrackDurationKey = config.UID_TRACK_DURATION_KEY;
     this.uidTrackPitchKey = config.UID_TRACK_PITCH_KEY;
+
+    this.nodeCollection = document.getElementsByClassName('node');
   }
 
   public start(): void {
@@ -52,16 +53,11 @@ class Visualizer {
         a = a.d;
       }
 
-      this.d3.select('.vis')
-        .html('')
-        .selectAll('div')
-        .data(a)
-        .enter()
-          .append('div')
-          .selectAll('div')
-          .data(data => Array(data))
-          .enter()
-          .append('div');
+      for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
+        for ( let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
+          this.nodeCollection[i].children[z].classList[ z >= a[i] ? 'add' : 'remove']('hidden');
+        }
+      }
 
       tick += 1;
     }, intervalTimer);
