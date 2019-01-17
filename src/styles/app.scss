@@ -5,12 +5,22 @@ body, html {
   color: #FFF;
   height: 100%;
   font-size: 16px;
+  font-family: sans-serif;
   margin: 0;
   width: 100%;
 }
 
 .hide {
   display: none !important;
+}
+
+.now-playing {
+  font-weight: 300;
+  left: 50%;
+  opacity: 0.5;
+  position: absolute;
+  top: rem(22);
+  transform: translateX(-50%);
 }
 
 .vis {

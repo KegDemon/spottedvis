@@ -10,6 +10,7 @@ class App {
   private loginBtn: any;
   private logoutBtn: any;
   private fullscreenBtn: any;
+  private nowPlaying: any;
   private vis: any;
 
   constructor() {
@@ -18,6 +19,7 @@ class App {
     this.loginBtn = document.getElementById('login');
     this.logoutBtn = document.getElementById('logout');
     this.fullscreenBtn = document.getElementById('fullscreen');
+    this.nowPlaying = document.getElementById('nowPlaying');
     this.fullscreen = fullScreen;
     this.vis = document.getElementsByClassName('vis')[0];
 
@@ -30,11 +32,13 @@ class App {
       this.logoutBtn.classList.remove('hide');
       this.fullscreenBtn.classList.remove('hide');
       this.vis.classList.remove('hide');
+      this.nowPlaying.classList.remove('hide');
     } else {
       this.loginBtn.classList.remove('hide');
       this.logoutBtn.classList.add('hide');
       this.fullscreenBtn.classList.add('hide');
       this.vis.classList.add('hide');
+      this.nowPlaying.classList.add('hide');
     }
 
     this.loginBtn.onclick = () => {
