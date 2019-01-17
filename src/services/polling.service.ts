@@ -71,13 +71,9 @@ class PollingService {
     this.storage.set(this.uidProgressKey, data.progress_ms / 1000);
     this.storage.set(this.uidTrackDurationKey, data.item.duration_ms);
 
-    if (this.nowPlayingEl) {
-      const artists = data.item.artists.reduce((acc: string, val: any, idx: number) => acc += idx === data.item.artists.length - 1 ? val.name : `${val.name}, `, '');
-      this.nowPlayingEl.innerText = `${data.item.name} - ${artists}`;
-    }
-
     if (data.is_playing && !this.visualizer.isActive()) {
       this.visualizer.start();
+      this.nowPlayingTrack(data);
     }
 
     if (!data.is_playing || data.currently_playing_type !== 'track') {
@@ -90,8 +86,16 @@ class PollingService {
       this.visualizer.stop();
     }
 
+    this.nowPlayingTrack(data);
     this.storage.set(this.uidTrackIdKey, data.item.id);
     this.audioAnalysis.get();
+  }
+
+  private nowPlayingTrack(data: any): void {
+    if (this.nowPlayingEl) {
+      const artists = data.item.artists.reduce((acc: string, val: any, idx: number) => acc += idx === data.item.artists.length - 1 ? val.name : `${val.name}, `, '');
+      this.nowPlayingEl.innerText = `${data.item.name} - ${artists}`;
+    }
   }
 }
 

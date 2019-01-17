@@ -23,6 +23,41 @@ body, html {
   transform: translateX(-50%);
 }
 
+button {
+  background: none;
+  border-radius: rem(4);
+  border: rem(1) solid rgba(255, 255, 255, 0.4);
+  color: #FFF;
+  cursor: pointer;
+  font-weight: 200;
+  opacity: 0.4;
+  padding: rem(8) rem(12);
+  position: absolute;
+  top: rem(16);
+  transition: opacity 1s;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &#fullscreen {
+    right: rem(16);
+  }
+
+  &#logout {
+    left: rem(16);
+  }
+
+  &#login {
+    font-size: rem(32);
+    left: 50%;
+    opacity: 1;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    transition: none;
+  }
+}
+
 .vis {
   align-items: flex-end;
   bottom: 0;
@@ -63,40 +98,5 @@ body, html {
         transition: opacity 1s;
       }
     }
-  }
-}
-
-button {
-  background: none;
-  border-radius: rem(4);
-  border: rem(1) solid rgba(255, 255, 255, 0.4);
-  color: #FFF;
-  cursor: pointer;
-  font-weight: 200;
-  opacity: 0.4;
-  padding: rem(8) rem(12);
-  position: absolute;
-  top: rem(16);
-  transition: opacity 1s;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  &#fullscreen {
-    right: rem(16);
-  }
-
-  &#logout {
-    left: rem(16);
-  }
-
-  &#login {
-    font-size: rem(32);
-    left: 50%;
-    opacity: 1;
-    top: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    transition: none;
   }
 }
