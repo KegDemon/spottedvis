@@ -2,26 +2,43 @@ import * as config from '../../config';
 import { generateRandomString, parseHashParams, Storage } from '../utils';
 
 class Auth {
-  private authScopes: String[] = [
-    'user-read-playback-state',
-    'user-read-currently-playing'
-  ];
-  private authURL: string = config.SPOTIFY_LOGIN_PATH;
-  private clientId: string = config.CLIENT_ID;
-  private parseHash: Function = parseHashParams;
-  private redirectUri: string = config.REDIRECT_URI;
-  private state: string = generateRandomString(16);
-  private storage: Storage = new Storage();
-  private uidProgressKey: string = config.UID_PROGRESS_KEY;
-  private uidStateKey: string = config.UID_STATE_KEY;
-  private uidTokenExpiryKey: string = config.UID_TOKEN_EXPIRY_KEY;
-  private uidTokenKey: string = config.UID_TOKEN_KEY;
-  private uidTrackDurationKey: string = config.UID_TRACK_DURATION_KEY;
-  private uidTrackIdKey: string = config.UID_TRACK_ID_KEY;
-  private uidTrackPitchKey: string = config.UID_TRACK_PITCH_KEY;
-  private url: string = `${this.authURL}?client_id=${this.clientId}&response_type=token&scope=${this.authScopes.join('%20')}&redirect_uri=${this.redirectUri}&state=${this.state}`;
+  private authScopes: String[];
+  private authURL: string;
+  private clientId: string;
+  private parseHash: Function;
+  private redirectUri: string;
+  private refreshTimer: any;
+  private state: string;
+  private storage: Storage;
+  private uidProgressKey: string;
+  private uidStateKey: string;
+  private uidTokenExpiryKey: string;
+  private uidTokenKey: string;
+  private uidTrackDurationKey: string;
+  private uidTrackIdKey: string;
+  private uidTrackPitchKey: string;
+  private url: string;
 
   constructor() {
+    this.authScopes = [
+      'user-read-playback-state',
+      'user-read-currently-playing'
+    ];
+    this.authURL = config.SPOTIFY_LOGIN_PATH;
+    this.clientId = config.CLIENT_ID;
+    this.parseHash = parseHashParams;
+    this.redirectUri = config.REDIRECT_URI;
+    this.state = generateRandomString(16);
+    this.storage = new Storage();
+    this.uidProgressKey = config.UID_PROGRESS_KEY;
+    this.uidStateKey = config.UID_STATE_KEY;
+    this.uidTokenExpiryKey = config.UID_TOKEN_EXPIRY_KEY;
+    this.uidTokenKey = config.UID_TOKEN_KEY;
+    this.uidTrackDurationKey = config.UID_TRACK_DURATION_KEY;
+    this.uidTrackIdKey = config.UID_TRACK_ID_KEY;
+    this.uidTrackPitchKey = config.UID_TRACK_PITCH_KEY;
+    this.url = this.getUrl();
+
     this.init();
   }
 
@@ -36,10 +53,14 @@ class Auth {
 
       window.location.hash = '';
     }
+
+    if (this.isLoggedIn()) {
+      this.loginRefresh();
+    }
   }
 
   private redirect(): void {
-    window.location.href = this.url;
+    window.location.href = this.getUrl();
   }
 
   public login(): void {
@@ -56,11 +77,29 @@ class Auth {
     this.storage.remove(this.uidProgressKey);
     this.storage.remove(this.uidTrackDurationKey);
 
+    clearTimeout(this.refreshTimer);
+
     window.location.href = this.redirectUri;
   }
 
   public isLoggedIn(): boolean {
     return !!(this.storage.get(this.uidTokenKey) && this.storage.get(this.uidTokenExpiryKey) > new Date().getTime());
+  }
+
+  private loginRefresh(): void {
+    this.refreshTimer = setInterval(() => {
+      const timeDiff: number = 3e5;
+      if (timeDiff < ((this.storage.get(this.uidTokenExpiryKey) as number) - new Date().getTime())) {
+        return;
+      }
+
+      this.state = generateRandomString(16);
+      this.login();
+    }, 1e4);
+  }
+
+  private getUrl(): string {
+    return `${this.authURL}?client_id=${this.clientId}&response_type=token&scope=${this.authScopes.join('%20')}&redirect_uri=${this.redirectUri}&state=${this.state}`;
   }
 }
 
