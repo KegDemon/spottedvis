@@ -23,7 +23,7 @@ class PollingService {
   constructor() {
     this.audioAnalysis = new AudioAnalysisService();
     this.auth = new Auth();
-    this.nowPlayingEl = document.getElementById('nowPlayingTrack');
+    this.nowPlayingEl = document.getElementById('nowPlaying');
     this.storage = new Storage();
     this.uidProgressKey = config.UID_PROGRESS_KEY;
     this.uidTokenKey = config.UID_TOKEN_KEY;
