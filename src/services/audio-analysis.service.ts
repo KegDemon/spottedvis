@@ -41,14 +41,49 @@ class AudioAnalysisService {
     });
   }
 
-  private parseData({data: {segments}}: any) {
+  private parseData({ data: { segments } }: any) {
     const parsedSegments = segments.reduce((acc: any, val: any): {} => {
-      acc.push({s: val.start, d: val.pitches.map((val: Number) => Math.round(+val * 10))});
+      const pitchMap: number[] = val.pitches.map((pitch: Number) => Math.round(+pitch * 10));
+
+      const { timbre: timb } = val;
+      const parsedData = pitchMap.reduce((res: any, pitch: any, idx: number) => {
+        const timbreLoc = this.pitchBuckets(timb[idx]);
+
+        if (!res[idx]) {
+          res[idx] = 0;
+        }
+
+        if (pitch > res[timbreLoc] || pitch > res[idx]) {
+          res[timbreLoc] = pitch;
+        }
+
+        return res;
+      }, [] as any);
+
+      acc.push({ s: val.start, d: parsedData });
 
       return acc;
     }, []);
 
     this.storage.set(this.uidTrackPitchKey, parsedSegments);
+  }
+
+  private pitchBuckets(timbre: number): number {
+    switch (true) {
+      case (timbre < -75): return 0;
+      case (timbre < -60): return 1;
+      case (timbre < -45): return 2;
+      case (timbre < -30): return 3;
+      case (timbre < -15): return 4;
+      case (timbre < 0): return 5;
+      case (timbre > 75): return 11;
+      case (timbre > 60): return 10;
+      case (timbre > 45): return 9;
+      case (timbre > 30): return 8;
+      case (timbre > 15): return 7;
+      case (timbre >= 0): return 6;
+      default: return 0;
+    }
   }
 }
 

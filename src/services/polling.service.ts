@@ -11,7 +11,7 @@ class PollingService {
   private axios: AxiosAdapter = Axios;
   private nowPlayingEl: HTMLElement | null;
   private polling: any; // interval
-  private pollingTime: number = 1000; // time in ms
+  private pollingTime: number = 1500; // time in ms
   private storage: Storage;
   private uidProgressKey: string;
   private uidTokenKey: string;

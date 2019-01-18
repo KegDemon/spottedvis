@@ -41,21 +41,19 @@ class Visualizer {
       return void 0;
     }
 
-    const runTime = +this.storage.get(this.uidTrackDurationKey);
-    const intervalTimer = runTime / (this.storage.get(this.uidTrackPitchKey) as [] || []).length;
+    const runTime: number = +this.storage.get(this.uidTrackDurationKey);
+    const intervalTimer: number = Math.round(runTime / (this.storage.get(this.uidTrackPitchKey) as [] || []).length);
 
     let prog: any = this.storage.get(this.uidProgressKey);
     let tick: number = this.getSyncIndex(pitches, prog);
     let lastProg: number = 0;
-    let lastSyncIdx: number = 0;
 
     this.interval = setInterval(() => {
       prog = this.storage.get(this.uidProgressKey);
 
       if (lastProg !== prog) {
         lastProg = prog;
-        lastSyncIdx = this.getSyncIndex(pitches, prog);
-        tick = tick > lastSyncIdx ? lastSyncIdx : tick;
+        tick = this.getSyncIndex(pitches, prog);
       }
 
       let currentPitchRange: [] = pitches[tick] ? (pitches[tick] as {s: number, d: []}).d : [];
