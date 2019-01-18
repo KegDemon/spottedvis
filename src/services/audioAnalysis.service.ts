@@ -43,22 +43,13 @@ class AudioAnalysisService {
 
   private parseData({ data: { segments } }: any) {
     const parsedSegments = segments.reduce((acc: any, val: any): {} => {
-      const pitchMap: number[] = val.pitches.map((pitch: Number) => Math.round(+pitch * 10));
-
-      const { timbre: timb } = val;
-      const parsedData = pitchMap.reduce((res: any, pitch: any, idx: number) => {
-        const timbreLoc = this.pitchBuckets(timb[idx]);
-
-        if (!res[idx]) {
-          res[idx] = 0;
-        }
-
-        if (pitch > res[timbreLoc] || pitch > res[idx]) {
-          res[timbreLoc] = pitch;
-        }
-
+      const { timbre, loudness_max } = val;
+      const parsedData = val.pitches.reduce((res: any[], pitch: number, idx: number) => {
+        res.push(this.getPeakValue(
+          Math.abs((timbre[idx]) * loudness_max) * (pitch * pitch)
+        ));
         return res;
-      }, [] as any);
+      }, []);
 
       acc.push({ s: val.start, d: parsedData });
 
@@ -68,20 +59,18 @@ class AudioAnalysisService {
     this.storage.set(this.uidTrackPitchKey, parsedSegments);
   }
 
-  private pitchBuckets(timbre: number): number {
+  private getPeakValue(val:number) {
     switch (true) {
-      case (timbre < -75): return 0;
-      case (timbre < -60): return 1;
-      case (timbre < -45): return 2;
-      case (timbre < -30): return 3;
-      case (timbre < -15): return 4;
-      case (timbre < 0): return 5;
-      case (timbre > 75): return 11;
-      case (timbre > 60): return 10;
-      case (timbre > 45): return 9;
-      case (timbre > 30): return 8;
-      case (timbre > 15): return 7;
-      case (timbre >= 0): return 6;
+      case val > 300: return 10;
+      case val > 225: return 9;
+      case val > 160: return 8;
+      case val > 135: return 7;
+      case val > 100: return 6;
+      case val > 75: return 5;
+      case val > 50: return 4;
+      case val > 25: return 3;
+      case val > 10: return 2;
+      case val > 1: return 1;
       default: return 0;
     }
   }

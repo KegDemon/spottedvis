@@ -35,15 +35,15 @@ class Visualizer {
 
     if (!pitches.length) {
       this.stop();
+      this.isRunning = false;
       setTimeout(() => {
         this.start();
       }, 1000);
       return void 0;
     }
 
-    const runTime: number = +this.storage.get(this.uidTrackDurationKey);
-    const intervalTimer: number = Math.round(runTime / (this.storage.get(this.uidTrackPitchKey) as [] || []).length);
-
+    const runTime: number = +this.storage.get(this.uidTrackDurationKey) / 1000 / 60;
+    const intervalTimer: number = Math.round((this.storage.get(this.uidTrackPitchKey) as [] || []).length / runTime);
     let prog: any = this.storage.get(this.uidProgressKey);
     let tick: number = this.getSyncIndex(pitches, prog);
     let lastProg: number = 0;
@@ -56,7 +56,7 @@ class Visualizer {
         tick = this.getSyncIndex(pitches, prog);
       }
 
-      let currentPitchRange: [] = pitches[tick] ? (pitches[tick] as {s: number, d: []}).d : [];
+      const currentPitchRange: [] = pitches[tick] ? (pitches[tick] as {s: number, d: []}).d : [];
 
       for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
         for ( let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
@@ -74,7 +74,6 @@ class Visualizer {
   }
 
   public isActive = () => this.isRunning;
-
 }
 
 export { Visualizer };

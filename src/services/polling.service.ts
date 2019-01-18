@@ -2,7 +2,7 @@ import Axios, { AxiosAdapter } from 'axios';
 import * as config from '../../config';
 import { Auth } from '../auth/auth';
 import { Storage } from '../utils';
-import { AudioAnalysisService } from './audio-analysis.service';
+import { AudioAnalysisService } from './audioAnalysis.service';
 import { Visualizer } from '../visualizer';
 
 class PollingService {

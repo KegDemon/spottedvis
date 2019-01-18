@@ -1,2 +1,2 @@
-export * from './audio-analysis.service';
+export * from './audioAnalysis.service';
 export * from './polling.service';
