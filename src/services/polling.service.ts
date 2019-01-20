@@ -68,6 +68,10 @@ class PollingService {
   }
 
   private parseData({ data }: any): void {
+    if (data.currently_playing_type !== 'track') {
+      return void 0;
+    }
+
     this.storage.set(this.uidProgressKey, data.progress_ms / 1000);
     this.storage.set(this.uidTrackDurationKey, data.item.duration_ms);
 
@@ -76,7 +80,7 @@ class PollingService {
       this.nowPlayingTrack(data);
     }
 
-    if (!data.is_playing || data.currently_playing_type !== 'track') {
+    if (!data.is_playing) {
       this.visualizer.stop();
     }
 
