@@ -8,10 +8,10 @@ import { Visualizer } from '../visualizer';
 class PollingService {
   private audioAnalysis: AudioAnalysisService;
   private auth: Auth;
-  private axios: AxiosAdapter = Axios;
+  private axios: AxiosAdapter;
   private nowPlayingEl: HTMLElement | null;
   private polling: any; // interval
-  private pollingTime: number = 1500; // time in ms
+  private pollingTime: number = 5000; // time in ms
   private storage: Storage;
   private uidProgressKey: string;
   private uidTokenKey: string;
@@ -23,6 +23,7 @@ class PollingService {
   constructor() {
     this.audioAnalysis = new AudioAnalysisService();
     this.auth = new Auth();
+    this.axios = Axios;
     this.nowPlayingEl = document.getElementById('nowPlaying');
     this.storage = new Storage();
     this.uidProgressKey = config.UID_PROGRESS_KEY;
