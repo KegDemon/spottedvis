@@ -5,6 +5,11 @@ import { Storage } from '../utils';
 import { AudioAnalysisService } from './audioAnalysis.service';
 import { Visualizer } from '../visualizer';
 
+/**
+ *
+ *
+ * @class PollingService
+ */
 class PollingService {
   private audioAnalysis: AudioAnalysisService;
   private auth: Auth;
@@ -36,6 +41,14 @@ class PollingService {
     this.init();
   }
 
+  /**
+   * Starts the polling if the user
+   * is currently logged in.
+   *
+   * @private
+   * @returns {void}
+   * @memberof PollingService
+   */
   private init(): void {
     if (!this.auth.isLoggedIn()) {
       return void 0;
@@ -44,6 +57,14 @@ class PollingService {
     this.startPolling();
   }
 
+
+  /**
+   * Polls the currently-playing end-point
+   * for what the user is currently playing.
+   *
+   * @private
+   * @memberof PollingService
+   */
   private startPolling(): void {
     this.polling = setInterval(() => {
       if (!this.auth.isLoggedIn()) {
@@ -63,11 +84,29 @@ class PollingService {
     }, this.pollingTime);
   }
 
+
+  /**
+   * Stops polling and the visualizer.
+   *
+   * @private
+   * @memberof PollingService
+   */
   private stopPolling(): void {
     clearInterval(this.polling);
     this.visualizer.stop();
   }
 
+  /**
+   * Parses the data returned from the
+   * polling request and determines
+   * if it needs to init or top the
+   * visualizer.
+   *
+   * @private
+   * @param {*} { data }
+   * @returns {void}
+   * @memberof PollingService
+   */
   private parseData({ data }: any): void {
     if (data.currently_playing_type !== 'track') {
       return void 0;
@@ -96,6 +135,14 @@ class PollingService {
     this.audioAnalysis.get();
   }
 
+  /**
+   * Sets the current playing track
+   * Song + Artist in the top of the browser.
+   *
+   * @private
+   * @param {*} data
+   * @memberof PollingService
+   */
   private nowPlayingTrack(data: any): void {
     if (this.nowPlayingEl) {
       const artists = data.item.artists.reduce((acc: string, val: any, idx: number) => acc += idx === data.item.artists.length - 1 ? val.name : `${val.name}, `, '');
