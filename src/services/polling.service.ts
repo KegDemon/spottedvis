@@ -72,15 +72,7 @@ class PollingService {
         return void 0;
       }
 
-      this.axios({
-        url: `${this.url}/me/player/currently-playing`,
-        headers: {
-          'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
-        }
-      }).then((data) => {
-        this.parseData(data);
-      });
-
+      this.getData();
     }, this.pollingTime);
   }
 
@@ -133,6 +125,7 @@ class PollingService {
     this.nowPlayingTrack(data);
     this.storage.set(this.uidTrackIdKey, data.item.id);
     this.audioAnalysis.get();
+    this.getData();
   }
 
   /**
@@ -148,6 +141,24 @@ class PollingService {
       const artists = data.item.artists.reduce((acc: string, val: any, idx: number) => acc += idx === data.item.artists.length - 1 ? val.name : `${val.name}, `, '');
       this.nowPlayingEl.innerText = `${data.item.name} - ${artists}`;
     }
+  }
+
+  /**
+   * Gets the data from the Spotify API
+   * about the currently playing track.
+   *
+   * @private
+   * @memberof PollingService
+   */
+  private getData(): void {
+    this.axios({
+      url: `${this.url}/me/player/currently-playing`,
+      headers: {
+        'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
+      }
+    }).then((data) => {
+      this.parseData(data);
+    });
   }
 }
 
