@@ -1,8 +1,9 @@
 import * as config from '../../config';
 import { Storage } from '../utils';
 
-interface Pitches {
+interface Pitch {
   s: number;
+  t: number;
   d: number[];
 }
 
@@ -25,7 +26,10 @@ class Visualizer {
     this.nodeCollection = document.getElementsByClassName('node');
   }
 
-  private getSyncIndex(inputArray: any[], prog: any): number {
+  private tickSync = (tick: number, sync: number): number => sync > (tick + 10) || tick > (sync + 10) ? sync : tick;
+
+  private getSyncIndex(inputArray: any[]): number {
+    const prog = this.storage.get(this.uidProgressKey) as number;
     return inputArray.reduce((prev: number, curr: any, idx: number, ref: any) =>
       Math.abs(curr.s - prog) < Math.abs(ref[prev].s - prog) ? idx : prev, 0)
   }
@@ -34,50 +38,55 @@ class Visualizer {
     this.stop();
     this.isRunning = true;
 
-    const pitches = this.storage.get(this.uidTrackPitchKey) as Pitches[] || [];
+    const pitches = this.storage.get(this.uidTrackPitchKey) as Pitch[] || [];
 
     if (!pitches.length) {
       this.stop();
       this.isRunning = false;
+
       setTimeout(() => {
         this.start();
       }, 1000);
-      return void 0;
+
+      return;
     }
 
-    const prog: any = this.storage.get(this.uidProgressKey);
-    let tick: number = this.getSyncIndex(pitches, prog);
+    this.playerAnimate(this.getSyncIndex(pitches), pitches);
+  }
 
-    const playerSync = () => {
-      const currentPitchRange: number[] = pitches[tick] ? pitches[tick].d : [];
+  private playerAnimate(tick: number, pitches: Pitch[]): void {
+    tick = this.tickSync(tick, this.getSyncIndex(pitches));
 
-      for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
-        for ( let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
-          this.nodeCollection[i].children[z].classList[ z >= currentPitchRange[i] ? 'add' : 'remove']('hidden');
-        }
+    const currentPitchRange: number[] = pitches[tick] ? pitches[tick].d : [];
+    const nextTick = tick + 1;
+
+    for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
+      for ( let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
+        this.nodeCollection[i].children[z].classList[ z >= currentPitchRange[i] ? 'add' : 'remove']('hidden');
       }
-
-      this.interval = setTimeout((self: any) => {
-        if (pitches[tick + 1]) {
-          playerSync();
-          return void 0;
-        }
-
-        clearTimeout(self.interval);
-      }, ((pitches[tick + 1].s - pitches[tick].s) * 1000), this);
-
-      tick += 1;
     }
 
-    playerSync();
+    if (!pitches[nextTick]) {
+      return;
+    }
+
+    this.interval = setTimeout(() => {
+      this.playerAnimate(nextTick, pitches);
+    }, pitches[nextTick].t);
   }
 
   public stop(): void {
     clearTimeout(this.interval);
     this.isRunning = false;
+
+    for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
+      for ( let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
+        this.nodeCollection[i].children[z].classList.add('hidden');
+      }
+    }
   }
 
-  public isActive = () => this.isRunning;
+  public isActive = (): boolean => this.isRunning;
 }
 
 export { Visualizer };
