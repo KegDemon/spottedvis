@@ -26,7 +26,7 @@ class Visualizer {
     this.nodeCollection = document.getElementsByClassName('node');
   }
 
-  private tickSync = (tick: number, sync: number): number => sync > (tick + 10) || tick > (sync + 10) ? sync : tick;
+  private tickSync = (tick: number, sync: number): number => sync > (tick + 5) || tick > (sync + 5) ? sync : tick;
 
   private getSyncIndex(inputArray: any[]): number {
     const prog = this.storage.get(this.uidProgressKey) as number;

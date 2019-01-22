@@ -53,7 +53,7 @@ class AudioAnalysisService {
 
       acc.push({
         s: val.start,
-        t: Math.round(val.duration * 1000),
+        t: +(val.duration * 1000).toFixed(3),
         d: parsedData,
       });
 
@@ -65,16 +65,17 @@ class AudioAnalysisService {
 
   private getPeakValue(val:number) {
     switch (true) {
-      case val > 375.654: return 10;
-      case val > 178.188: return 9;
-      case val > 85.114: return 8;
-      case val > 40.118: return 7;
-      case val > 19.395: return 6;
-      case val > 8.932: return 5;
-      case val > 4.51: return 4;
-      case val > 1.906: return 3;
-      case val > 1.122: return 2;
-      case val > 0.338: return 1;
+      case val < 0.05: return 10;
+      case val < 0.3: return 9;
+      case val < 0.55: return 8;
+      case val < 2.05: return 7;
+      case val < 4.8: return 6;
+      case val < 15.05: return 5;
+      case val < 39.05: return 4;
+      case val < 114.3: return 3;
+      case val < 309.55: return 2;
+      case val < 881.05: return 1;
+      case val > 881.05: return 0;
       default: return 0;
     }
   }
