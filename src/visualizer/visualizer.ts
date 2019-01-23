@@ -11,23 +11,60 @@ import { Storage } from '../utils';
 class Visualizer {
   private eventemitter: EventEmitter;
   private isRunning: boolean;
-  private nodeCollection: HTMLCollection;
+  private nodeCollection: HTMLElement[];
   private storage: Storage;
   private timeout: any;
+  private timeoutStart: any;
   private uidProgressKey: string;
   private uidTrackPitchKey: string;
 
   constructor() {
     this.eventemitter = new EventEmitter();
     this.isRunning = false;
-    this.nodeCollection = document.getElementsByClassName('node');
+    this.nodeCollection = [];
     this.storage = new Storage();
     this.uidProgressKey = config.UID_PROGRESS_KEY;
     this.uidTrackPitchKey = config.UID_TRACK_PITCH_KEY;
+    this.registerEventEmitters();
+    this.parseNodes();
+  }
+
+  /**
+   * Registers the local EventEmitters
+   * for consumption.
+   *
+   * @private
+   * @memberof Visualizer
+   */
+  private registerEventEmitters(): void {
     this.eventemitter.on('event:animation-start', this.start, this);
-    this.eventemitter.on('event:animation-update', (tick: number, pitches: []) => {
-      this.playerAnimate(tick, pitches);
+    this.eventemitter.on('event:animation-update', (tick: number, pitches: Pitch[]) => {
+      if ( !this.isRunning ) {
+        this.stop();
+        return;
+      }
+
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(this.playerAnimate.bind(this), pitches[tick].t, tick, pitches);
     });
+  }
+
+  /**
+   * Create a static array reference
+   * of the DOM nodes to run against.
+   *
+   * @private
+   * @memberof Visualizer
+   */
+  private parseNodes(): void {
+    const collection: HTMLCollection = document.getElementsByClassName('node');
+    const arr: HTMLElement[] = [];
+
+    for (let i = 0, ii = collection.length; i < ii; ++i) {
+      arr.push(collection[i] as HTMLElement);
+    }
+
+    this.nodeCollection = arr;
   }
 
   /**
@@ -55,6 +92,8 @@ class Visualizer {
    */
   public start(): void {
     this.stop();
+    clearTimeout(this.timeoutStart);
+    this.timeoutStart = void 0;
     this.isRunning = true;
 
     const pitches = this.storage.get(this.uidTrackPitchKey) as Pitch[] || [];
@@ -63,7 +102,7 @@ class Visualizer {
       this.stop();
       this.isRunning = false;
 
-      setTimeout(() => {
+      this.timeoutStart = setTimeout(() => {
         this.eventemitter.emit('event:animation-start');
       }, 1000);
 
@@ -97,12 +136,11 @@ class Visualizer {
     }
 
     if (!pitches[nextTick]) {
+      this.stop();
       return;
     }
 
-    this.timeout = setTimeout(() => {
-      this.eventemitter.emit('event:animation-update', nextTick, pitches);
-    }, pitches[nextTick].t);
+    this.eventemitter.emit('event:animation-update', nextTick, pitches);
   }
 
   /**
@@ -112,8 +150,10 @@ class Visualizer {
    * @memberof Visualizer
    */
   public stop(): void {
+    clearTimeout(this.timeoutStart);
     clearTimeout(this.timeout);
     this.timeout = void 0;
+    this.timeoutStart = void 0;
     this.isRunning = false;
 
     for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {

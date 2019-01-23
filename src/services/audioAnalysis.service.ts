@@ -1,7 +1,6 @@
-import Axios, { AxiosAdapter } from 'axios';
 import * as config from '../../config';
-import { Pitch } from '../interfaces';
 import { Storage } from '../utils';
+import { Pitch } from '../interfaces/index';
 
 /**
  *
@@ -9,7 +8,6 @@ import { Storage } from '../utils';
  * @class AudioAnalysisService
  */
 class AudioAnalysisService {
-  private axios: AxiosAdapter;
   private storage: Storage;
   private trackId: string | null;
   private uidTokenKey: string;
@@ -18,7 +16,6 @@ class AudioAnalysisService {
   private url: string;
 
   constructor() {
-    this.axios = Axios;
     this.storage = new Storage();
     this.trackId = null;
     this.uidTokenKey = config.UID_TOKEN_KEY;
@@ -41,12 +38,18 @@ class AudioAnalysisService {
       return void 0;
     }
 
-    this.axios({
-      url: `${this.url}/audio-analysis/${this.trackId}`,
+    fetch(`${this.url}/audio-analysis/${this.trackId}`, {
       headers: {
         'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
       }
-    }).then(this.parseData.bind(this));
+    })
+      .then((data: Response) => data.json())
+      .then((data: any) => {
+        this.parseData(data);
+      })
+      .catch((error: Error) => {
+        console.error(error);
+      });
   }
 
   /**
@@ -58,20 +61,19 @@ class AudioAnalysisService {
    * @param {*} { data: { segments } }
    * @memberof AudioAnalysisService
    */
-  private parseData({ data: { segments } }: any): void {
-    const parsedData = [];
-    let acc = [];
+  private parseData({ segments }: any): void {
+    let parsedData: Pitch[] = [];
+    let acc: any[] = [];
 
     for (let i = 0, ii = segments.length; i < ii; ++i) {
-      acc = new Array();
-
+      acc = [];
       for (let z = 0, zz = segments[i].pitches.length; z < zz; ++z) {
-        acc.push(this.getPeakValue(
-          Math.abs(segments[i].timbre[z] * segments[i].loudness_max) * (segments[i].pitches[z] * segments[i].pitches[z])
-        ));
+        acc[z] = this.getPeakValue(
+          Math.abs(segments[i].timbre[z] * segments[i].loudness_max) * segments[i].pitches[z]
+        );
       }
 
-      parsedData.push({
+      parsedData[i] = ({
         d: acc,
         s: segments[i].start,
         t: +(segments[i].duration * 1000).toFixed(3),
@@ -79,6 +81,9 @@ class AudioAnalysisService {
     }
 
     this.storage.set(this.uidTrackPitchKey, parsedData);
+
+    parsedData.length = 0;
+    acc.length = 0;
   }
 
   /**
@@ -103,16 +108,16 @@ class AudioAnalysisService {
   private getPeakValue(val: number): number {
     switch (true) {
       case val < 0.025: return 10;
-      case val < 0.169: return 9;
-      case val < 0.313: return 8;
-      case val < 1.285: return 7;
-      case val < 3.085: return 6;
-      case val < 10.474: return 5;
-      case val < 28.213: return 4;
-      case val < 88.439: return 3;
-      case val < 250.664: return 2;
-      case val < 759.188: return 1;
-      case val >= 759.188: return 0;
+      case val < 0.175: return 9;
+      case val < 0.325: return 8;
+      case val < 1.375: return 7;
+      case val < 3.325: return 6;
+      case val < 11.575: return 5;
+      case val < 31.525: return 4;
+      case val < 100.975: return 3;
+      case val < 290.125: return 2;
+      case val < 895.975: return 1;
+      case val >= 895.975: return 0;
       default: return 0;
     }
   }

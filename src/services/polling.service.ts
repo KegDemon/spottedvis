@@ -1,4 +1,3 @@
-import Axios, { AxiosAdapter } from 'axios';
 import EventEmitter from 'eventemitter3';
 import * as config from '../../config';
 import { Auth } from '../auth/auth';
@@ -14,7 +13,6 @@ import { AudioAnalysisService } from './audioAnalysis.service';
 class PollingService {
   private audioAnalysis: AudioAnalysisService;
   private auth: Auth;
-  private axios: AxiosAdapter;
   private eventemitter: EventEmitter;
   private nowPlayingEl: HTMLElement | null;
   private polling: any; // interval
@@ -31,7 +29,6 @@ class PollingService {
   constructor() {
     this.audioAnalysis = new AudioAnalysisService();
     this.auth = new Auth();
-    this.axios = Axios;
     this.eventemitter = new EventEmitter();
     this.nowPlayingEl = document.getElementById('nowPlaying');
     this.storage = new Storage();
@@ -115,7 +112,7 @@ class PollingService {
    * @returns {void}
    * @memberof PollingService
    */
-  private parseData({ data }: any): void {
+  private parseData(data: any): void {
     if (data.currently_playing_type !== 'track') {
       return void 0;
     }
@@ -168,12 +165,18 @@ class PollingService {
    */
   private getData(): void {
     this.timer = performance.now();
-    this.axios({
-      url: `${this.url}/me/player/currently-playing`,
+    fetch(`${this.url}/me/player/currently-playing`, {
       headers: {
         'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
       }
-    }).then(this.parseData.bind(this));
+    })
+      .then((data: Response): {} => data.json())
+      .then((data: any) => {
+        this.parseData(data);
+      })
+      .catch((error: Error) => {
+        console.error(error);
+      });
   }
 }
 
