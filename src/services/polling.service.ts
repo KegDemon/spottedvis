@@ -142,8 +142,6 @@ class PollingService {
     this.storage.set(this.uidTrackIdKey, data.item.id);
     this.audioAnalysis.get();
     this.getData();
-    this.stopPolling();
-    this.startPolling();
   }
 
   /**
