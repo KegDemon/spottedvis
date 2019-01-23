@@ -1,9 +1,10 @@
 import Axios, { AxiosAdapter } from 'axios';
+import EventEmitter from 'eventemitter3';
 import * as config from '../../config';
 import { Auth } from '../auth/auth';
 import { Storage } from '../utils';
-import { AudioAnalysisService } from './audioAnalysis.service';
 import { Visualizer } from '../visualizer';
+import { AudioAnalysisService } from './audioAnalysis.service';
 
 /**
  *
@@ -14,10 +15,12 @@ class PollingService {
   private audioAnalysis: AudioAnalysisService;
   private auth: Auth;
   private axios: AxiosAdapter;
+  private eventemitter: EventEmitter;
   private nowPlayingEl: HTMLElement | null;
   private polling: any; // interval
   private pollingTime: number = 5000; // time in ms
   private storage: Storage;
+  private timer: number;
   private uidProgressKey: string;
   private uidTokenKey: string;
   private uidTrackDurationKey: string;
@@ -29,8 +32,10 @@ class PollingService {
     this.audioAnalysis = new AudioAnalysisService();
     this.auth = new Auth();
     this.axios = Axios;
+    this.eventemitter = new EventEmitter();
     this.nowPlayingEl = document.getElementById('nowPlaying');
     this.storage = new Storage();
+    this.timer = 0;
     this.uidProgressKey = config.UID_PROGRESS_KEY;
     this.uidTokenKey = config.UID_TOKEN_KEY;
     this.uidTrackDurationKey = config.UID_TRACK_DURATION_KEY;
@@ -55,8 +60,8 @@ class PollingService {
     }
 
     this.startPolling();
+    this.eventemitter.on('event:poll', this.pollingData, this);
   }
-
 
   /**
    * Polls the currently-playing end-point
@@ -67,15 +72,25 @@ class PollingService {
    */
   private startPolling(): void {
     this.polling = setInterval(() => {
-      if (!this.auth.isLoggedIn()) {
-        this.stopPolling();
-        return void 0;
-      }
-
-      this.getData();
+      this.eventemitter.emit('event:poll');
     }, this.pollingTime);
   }
 
+  /**
+   * Fetch the data for the polled event.
+   *
+   * @private
+   * @returns {void}
+   * @memberof PollingService
+   */
+  private pollingData(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.stopPolling();
+      return void 0;
+    }
+
+    this.getData();
+  }
 
   /**
    * Stops polling and the visualizer.
@@ -85,6 +100,7 @@ class PollingService {
    */
   private stopPolling(): void {
     clearInterval(this.polling);
+    this.polling = void 0;
     this.visualizer.stop();
   }
 
@@ -104,7 +120,7 @@ class PollingService {
       return void 0;
     }
 
-    this.storage.set(this.uidProgressKey, data.progress_ms / 1000);
+    this.storage.set(this.uidProgressKey, +((data.progress_ms + +(performance.now() - this.timer).toFixed(3)) / 1000).toFixed(2));
     this.storage.set(this.uidTrackDurationKey, data.item.duration_ms);
 
     if (data.is_playing && !this.visualizer.isActive()) {
@@ -126,6 +142,8 @@ class PollingService {
     this.storage.set(this.uidTrackIdKey, data.item.id);
     this.audioAnalysis.get();
     this.getData();
+    this.stopPolling();
+    this.startPolling();
   }
 
   /**
@@ -151,15 +169,15 @@ class PollingService {
    * @memberof PollingService
    */
   private getData(): void {
+    this.timer = performance.now();
     this.axios({
       url: `${this.url}/me/player/currently-playing`,
       headers: {
         'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
       }
-    }).then((data) => {
-      this.parseData(data);
-    });
+    }).then(this.parseData.bind(this));
   }
 }
 
 export { PollingService };
+

@@ -46,9 +46,7 @@ class AudioAnalysisService {
       headers: {
         'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
       }
-    }).then(data => {
-      this.parseData(data);
-    });
+    }).then(this.parseData.bind(this));
   }
 
   /**
@@ -61,25 +59,26 @@ class AudioAnalysisService {
    * @memberof AudioAnalysisService
    */
   private parseData({ data: { segments } }: any): void {
-    const parsedSegments = segments.reduce((acc: any, val: any): {} => {
-      const { timbre, loudness_max } = val;
-      const parsedData: Pitch[] = val.pitches.reduce((res: any[], pitch: number, idx: number): Pitch[] => {
-        res.push(this.getPeakValue(
-          Math.abs((timbre[idx]) * loudness_max) * (pitch * pitch)
+    const _finalData = [];
+
+    for (let i = 0, ii = segments.length; i < ii; ++i) {
+      const { timbre, loudness_max } = segments[i];
+      const acc = [];
+
+      for (let z = 0, zz = segments[i].pitches.length; z < zz; ++z) {
+        acc.push(this.getPeakValue(
+          Math.abs(timbre[z] * loudness_max) * (segments[i].pitches[z] * segments[i].pitches[z])
         ));
-        return res;
-      }, []);
+      }
 
-      acc.push({
-        s: val.start,
-        t: +(val.duration * 1000).toFixed(3),
-        d: parsedData,
+      _finalData.push({
+        s: segments[i].start,
+        t: +((segments[i].duration * 1000) + 2).toFixed(3),
+        d: acc
       });
+    }
 
-      return acc;
-    }, []);
-
-    this.storage.set(this.uidTrackPitchKey, parsedSegments);
+    this.storage.set(this.uidTrackPitchKey, _finalData);
   }
 
   /**

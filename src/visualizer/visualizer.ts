@@ -1,4 +1,5 @@
 import * as config from '../../config';
+import EventEmitter from 'eventemitter3';
 import { Pitch } from '../interfaces';
 import { Storage } from '../utils';
 
@@ -8,6 +9,7 @@ import { Storage } from '../utils';
  * @class Visualizer
  */
 class Visualizer {
+  private eventemitter: EventEmitter;
   private isRunning: boolean;
   private nodeCollection: HTMLCollection;
   private storage: Storage;
@@ -16,11 +18,16 @@ class Visualizer {
   private uidTrackPitchKey: string;
 
   constructor() {
+    this.eventemitter = new EventEmitter();
     this.isRunning = false;
     this.nodeCollection = document.getElementsByClassName('node');
     this.storage = new Storage();
     this.uidProgressKey = config.UID_PROGRESS_KEY;
     this.uidTrackPitchKey = config.UID_TRACK_PITCH_KEY;
+    this.eventemitter.on('event:animation-start', this.start, this);
+    this.eventemitter.on('event:animation-update', (tick: number, pitches: []) => {
+      this.playerAnimate(tick, pitches);
+    });
   }
 
   /**
@@ -57,7 +64,7 @@ class Visualizer {
       this.isRunning = false;
 
       setTimeout(() => {
-        this.start();
+        this.eventemitter.emit('event:animation-start');
       }, 1000);
 
       return;
@@ -89,12 +96,12 @@ class Visualizer {
       }
     }
 
-    if (!pitches[nextTick]) {
+    if (!pitches[nextTick] && !pitches[nextTick].t) {
       return;
     }
 
     this.timeout = setTimeout(() => {
-      this.playerAnimate(nextTick, pitches);
+      this.eventemitter.emit('event:animation-update', nextTick, pitches);
     }, pitches[nextTick].t);
   }
 
@@ -106,6 +113,7 @@ class Visualizer {
    */
   public stop(): void {
     clearTimeout(this.timeout);
+    this.timeout = void 0;
     this.isRunning = false;
 
     for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
