@@ -96,7 +96,7 @@ class Visualizer {
       }
     }
 
-    if (!pitches[nextTick] && !pitches[nextTick].t) {
+    if (!pitches[nextTick]) {
       return;
     }
 
