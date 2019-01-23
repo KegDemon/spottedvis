@@ -59,26 +59,26 @@ class AudioAnalysisService {
    * @memberof AudioAnalysisService
    */
   private parseData({ data: { segments } }: any): void {
-    const _finalData = [];
+    const parsedData = [];
+    let acc = [];
 
     for (let i = 0, ii = segments.length; i < ii; ++i) {
-      const { timbre, loudness_max } = segments[i];
-      const acc = [];
+      acc = new Array();
 
       for (let z = 0, zz = segments[i].pitches.length; z < zz; ++z) {
         acc.push(this.getPeakValue(
-          Math.abs(timbre[z] * loudness_max) * (segments[i].pitches[z] * segments[i].pitches[z])
+          Math.abs(segments[i].timbre[z] * segments[i].loudness_max) * (segments[i].pitches[z] * segments[i].pitches[z])
         ));
       }
 
-      _finalData.push({
+      parsedData.push({
+        d: acc,
         s: segments[i].start,
-        t: +((segments[i].duration * 1000) + 2).toFixed(3),
-        d: acc
+        t: +(segments[i].duration * 1000).toFixed(3),
       });
     }
 
-    this.storage.set(this.uidTrackPitchKey, _finalData);
+    this.storage.set(this.uidTrackPitchKey, parsedData);
   }
 
   /**

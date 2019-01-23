@@ -70,7 +70,7 @@ class Visualizer {
       return;
     }
 
-    this.playerAnimate(this.getSyncIndex(pitches), pitches);
+    this.eventemitter.emit('event:animation-update', this.getSyncIndex(pitches), pitches);
   }
 
   /**
