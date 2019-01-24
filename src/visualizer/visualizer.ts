@@ -92,8 +92,6 @@ class Visualizer {
    */
   public start(): void {
     this.stop();
-    clearTimeout(this.timeoutStart);
-    this.timeoutStart = void 0;
     this.isRunning = true;
 
     const pitches = this.storage.get(this.uidTrackPitchKey) as Pitch[] || [];
@@ -124,10 +122,9 @@ class Visualizer {
    * @memberof Visualizer
    */
   private playerAnimate(tick: number, pitches: Pitch[]): void {
-    tick = this.tickSync(tick, this.getSyncIndex(pitches));
-
-    const currentPitchRange: number[] = pitches[tick] ? pitches[tick].d : [];
-    const nextTick = tick + 1;
+    const syncTick = this.tickSync(tick, this.getSyncIndex(pitches));
+    const currentPitchRange: number[] = pitches[syncTick] ? pitches[syncTick].d : [];
+    const nextTick = syncTick + 1;
 
     for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
       for (let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
@@ -150,8 +147,8 @@ class Visualizer {
    * @memberof Visualizer
    */
   public stop(): void {
-    clearTimeout(this.timeoutStart);
     clearTimeout(this.timeout);
+    clearTimeout(this.timeoutStart);
     this.timeout = void 0;
     this.timeoutStart = void 0;
     this.isRunning = false;

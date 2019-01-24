@@ -83,6 +83,7 @@ button {
       height: rem(38);
       margin-bottom: rem(4);
       opacity: 1;
+      transition: opacity 200ms;
       width: rem(12);
 
       &:nth-of-type(n + 6) {

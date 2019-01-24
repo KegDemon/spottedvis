@@ -63,13 +63,18 @@ class AudioAnalysisService {
    */
   private parseData({ segments }: any): void {
     let parsedData: Pitch[] = [];
-    let acc: any[] = [];
+    let acc: number[] = [];
+    let _s: number[] = [];
 
     for (let i = 0, ii = segments.length; i < ii; ++i) {
       acc = [];
+      _s = segments[i].pitches.slice().sort();
+
       for (let z = 0, zz = segments[i].pitches.length; z < zz; ++z) {
-        acc[z] = this.getPeakValue(
-          Math.abs(segments[i].timbre[z] * segments[i].loudness_max) * segments[i].pitches[z]
+        let idx = _s.indexOf(segments[i].pitches[z]);
+
+        acc[acc[idx] ? acc[idx + 1] ? idx + 2 : idx + 1 : idx] = this.getPeakValue(
+          (segments[i].timbre[z] * segments[i].loudness_max) * segments[i].pitches[z]
         );
       }
 
@@ -107,17 +112,16 @@ class AudioAnalysisService {
    */
   private getPeakValue(val: number): number {
     switch (true) {
-      case val < 0.025: return 10;
-      case val < 0.175: return 9;
-      case val < 0.325: return 8;
-      case val < 1.375: return 7;
-      case val < 3.325: return 6;
-      case val < 11.575: return 5;
-      case val < 31.525: return 4;
-      case val < 100.975: return 3;
-      case val < 290.125: return 2;
-      case val < 895.975: return 1;
-      case val >= 895.975: return 0;
+      case val > 714.496 || val < -714.496: return 10;
+      case val > 330.036 || val < -330.036: return 9;
+      case val > 153.784 || val < -153.784: return 8;
+      case val > 70.501 || val < -70.501: return 7;
+      case val > 33.313 || val < -33.313: return 6;
+      case val > 14.875 || val < -14.875: return 5;
+      case val > 7.375 || val < -7.375: return 4;
+      case val > 3 || val < -3: return 3;
+      case val > 1.75 || val < -1.75: return 2;
+      case val > 0.5 || val < -0.5: return 1;
       default: return 0;
     }
   }
