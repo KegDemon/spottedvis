@@ -107,26 +107,26 @@ class AudioAnalysisService {
    */
   private getPeakValue(val: number): number {
     switch (true) {
-      case val > 881.05: return 10;
-      case val > 309.55: return 9;
-      case val > 114.3: return 8;
-      case val > 39.05: return 7;
-      case val > 15.05: return 6;
-      case val > 4.8: return 5;
-      case val > 2.05: return 4;
-      case val > 0.55: return 3;
-      case val > 0.3: return 2;
-      case val > 0.05: return 1;
-      case val < -881.05 / 2: return 1;
-      case val < -309.55 / 2: return 2;
-      case val < -114.3 / 2: return 3;
-      case val < -39.05 / 2: return 4;
-      case val < -15.05 / 2: return 5;
-      case val < -4.8 / 2: return 6;
-      case val < -2.05 / 2: return 7;
-      case val < -0.55 / 2: return 8;
-      case val < -0.3 / 2: return 9;
-      case val < -0.05 / 2: return 10;
+      case val > 501.85: return 10;
+      case val > 240.618: return 9;
+      case val > 116.103: return 8;
+      case val > 55.34: return 7;
+      case val > 27.006: return 6;
+      case val > 12.593: return 5;
+      case val > 6.406: return 4;
+      case val > 2.75: return 3;
+      case val > 1.625: return 2;
+      case val > 0.5: return 1;
+      case val < -501.85 / 2: return 1;
+      case val < -240.618 / 2: return 2;
+      case val < -116.103 / 2: return 3;
+      case val < -55.34 / 2: return 4;
+      case val < -27.006 / 2: return 5;
+      case val < -12.593 / 2: return 6;
+      case val < -6.406 / 2: return 7;
+      case val < -2.75 / 2: return 8;
+      case val < -1.625 / 2: return 9;
+      case val < -0.5 / 2: return 10;
       default: return 0;
     }
   }
