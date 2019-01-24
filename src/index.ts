@@ -11,7 +11,7 @@ class App {
   private logoutBtn: any;
   private fullscreenBtn: any;
   private nowPlaying: any;
-  private vis: any;
+  private container: any;
 
   constructor() {
     this.auth = new Auth();
@@ -21,7 +21,7 @@ class App {
     this.fullscreenBtn = document.getElementById('fullscreen');
     this.nowPlaying = document.getElementById('nowPlaying');
     this.fullscreen = fullScreen;
-    this.vis = document.getElementsByClassName('vis')[0];
+    this.container = document.getElementsByClassName('container')[0];
 
     this.init();
   }
@@ -31,13 +31,13 @@ class App {
       this.loginBtn.classList.add('hide');
       this.logoutBtn.classList.remove('hide');
       this.fullscreenBtn.classList.remove('hide');
-      this.vis.classList.remove('hide');
+      this.container.classList.remove('hide');
       this.nowPlaying.classList.remove('hide');
     } else {
       this.loginBtn.classList.remove('hide');
       this.logoutBtn.classList.add('hide');
       this.fullscreenBtn.classList.add('hide');
-      this.vis.classList.add('hide');
+      this.container.classList.add('hide');
       this.nowPlaying.classList.add('hide');
     }
 

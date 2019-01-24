@@ -126,9 +126,17 @@ class Visualizer {
     const currentPitchRange: number[] = pitches[syncTick] ? pitches[syncTick].d : [];
     const nextTick = syncTick + 1;
 
-    for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
+    for (let i = 0, ii = this.nodeCollection.length / 2; i < ii; ++i) {
       for (let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
-        this.nodeCollection[i].children[z].classList[z >= currentPitchRange[i] ? 'add' : 'remove']('hidden');
+        this.nodeCollection[i].children[z].classList[z >= currentPitchRange[i]
+            ? 'add'
+            : 'remove'
+          ]('hidden');
+
+        this.nodeCollection[i + 12].children[z].classList[z >= currentPitchRange[i]
+            ? 'add'
+            : 'remove'
+          ]('hidden');
       }
     }
 
