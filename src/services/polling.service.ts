@@ -137,9 +137,9 @@ class PollingService {
 
     this.nowPlayingTrack(data);
     this.storage.set(this.uidTrackIdKey, data.item.id);
-    this.getData();
     this.audioAnalysis.get()
-      .then(() => {
+    .then(() => {
+        this.getData();
         this.visualizer.start();
       });
   }
