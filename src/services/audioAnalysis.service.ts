@@ -1,6 +1,6 @@
 import * as config from '../../config';
+import { Pitch, PreCalcPitch } from '../interfaces';
 import { Storage } from '../utils';
-import { Pitch } from '../interfaces/index';
 
 /**
  *
@@ -62,33 +62,31 @@ class AudioAnalysisService {
    * @memberof AudioAnalysisService
    */
   private parseData({ segments }: any): void {
-    let parsedData: Pitch[] = [];
-    let acc: number[] = [];
-    let _s: number[] = [];
+    let parsedData: Pitch[] = (segments as [])
+      .map((val: any) => {
+        let ret: number[] = (val.pitches as number[])
+          .reduce((prev: PreCalcPitch[], curr: number, i: number) => {
+            prev.push({
+              p: curr,
+              t: this.getPeakValue(
+                (val.timbre[i] * val.loudness_max) * curr
+              ),
+            });
+            return prev;
+          }, [])
+          .sort((a: PreCalcPitch, b: PreCalcPitch) => a.p - b.p)
+          .map((val: PreCalcPitch) => val.t);
 
-    for (let i = 0, ii = segments.length; i < ii; ++i) {
-      acc = [];
-      _s = segments[i].pitches.slice().sort();
-
-      for (let z = 0, zz = segments[i].pitches.length; z < zz; ++z) {
-        let idx = _s.indexOf(segments[i].pitches[z]);
-
-        acc[acc[idx] ? acc[idx + 1] ? idx + 2 : idx + 1 : idx] = this.getPeakValue(
-          (segments[i].timbre[z] * segments[i].loudness_max) * segments[i].pitches[z]
-        );
-      }
-
-      parsedData[i] = ({
-        d: acc,
-        s: segments[i].start,
-        t: +(segments[i].duration * 1000).toFixed(3),
+        return ({
+          d: ret,
+          s: val.start,
+          t: +(val.duration * 1000).toFixed(3)
+        });
       });
-    }
 
     this.storage.set(this.uidTrackPitchKey, parsedData);
 
     parsedData.length = 0;
-    acc.length = 0;
   }
 
   /**
@@ -112,19 +110,30 @@ class AudioAnalysisService {
    */
   private getPeakValue(val: number): number {
     switch (true) {
-      case val > 714.496 || val < -714.496: return 10;
-      case val > 330.036 || val < -330.036: return 9;
-      case val > 153.784 || val < -153.784: return 8;
-      case val > 70.501 || val < -70.501: return 7;
-      case val > 33.313 || val < -33.313: return 6;
-      case val > 14.875 || val < -14.875: return 5;
-      case val > 7.375 || val < -7.375: return 4;
-      case val > 3 || val < -3: return 3;
-      case val > 1.75 || val < -1.75: return 2;
-      case val > 0.5 || val < -0.5: return 1;
+      case val > 881.05: return 10;
+      case val > 309.55: return 9;
+      case val > 114.3: return 8;
+      case val > 39.05: return 7;
+      case val > 15.05: return 6;
+      case val > 4.8: return 5;
+      case val > 2.05: return 4;
+      case val > 0.55: return 3;
+      case val > 0.3: return 2;
+      case val > 0.05: return 1;
+      case val < -881.05 / 2: return 1;
+      case val < -309.55 / 2: return 2;
+      case val < -114.3 / 2: return 3;
+      case val < -39.05 / 2: return 4;
+      case val < -15.05 / 2: return 5;
+      case val < -4.8 / 2: return 6;
+      case val < -2.05 / 2: return 7;
+      case val < -0.55 / 2: return 8;
+      case val < -0.3 / 2: return 9;
+      case val < -0.05 / 2: return 10;
       default: return 0;
     }
   }
 }
 
 export { AudioAnalysisService };
+
