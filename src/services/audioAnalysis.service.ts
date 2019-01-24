@@ -31,14 +31,11 @@ class AudioAnalysisService {
    * @returns {void}
    * @memberof AudioAnalysisService
    */
-  public get(): void {
+  public get(): Promise<void> {
     this.trackId = this.storage.get(this.uidTrackIdKey) as string | null;
+    this.storage.remove(this.uidTrackPitchKey);
 
-    if (!this.trackId) {
-      return void 0;
-    }
-
-    fetch(`${this.url}/audio-analysis/${this.trackId}`, {
+    return fetch(`${this.url}/audio-analysis/${this.trackId}`, {
       headers: {
         'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
       }
