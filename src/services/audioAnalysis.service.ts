@@ -8,6 +8,8 @@ import { Storage } from '../utils';
  * @class AudioAnalysisService
  */
 class AudioAnalysisService {
+  private curveValues: number[];
+  private maxValue: number;
   private storage: Storage;
   private trackId: string | null;
   private uidTokenKey: string;
@@ -16,6 +18,8 @@ class AudioAnalysisService {
   private url: string;
 
   constructor() {
+    this.curveValues = [];
+    this.maxValue = 0;
     this.storage = new Storage();
     this.trackId = null;
     this.uidTokenKey = config.UID_TOKEN_KEY;
@@ -37,7 +41,7 @@ class AudioAnalysisService {
 
     return fetch(`${this.url}/audio-analysis/${this.trackId}`, {
       headers: {
-        'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
+        Authorization: `Bearer ${this.storage.get(this.uidTokenKey)}`
       }
     })
       .then((data: Response) => data.json())
@@ -59,31 +63,32 @@ class AudioAnalysisService {
    * @memberof AudioAnalysisService
    */
   private parseData({ segments }: any): void {
-    let parsedData: Pitch[] = (segments as [])
-      .map((val: any) => {
-        let ret: number[] = (val.pitches as number[])
-          .reduce((prev: PreCalcPitch[], curr: number, i: number) => {
-            prev.push({
-              p: curr,
-              t: this.getPeakValue(
-                (val.timbre[i] * val.loudness_max) * curr
-              ),
-            });
-            return prev;
-          }, [])
-          .sort((a: PreCalcPitch, b: PreCalcPitch) => a.p - b.p)
-          .map((val: PreCalcPitch) => val.t);
+    this.maxValue = this.getMax(segments);
+    this.curveValues = this.createCurveValues();
 
-        return ({
-          d: ret,
-          s: val.start,
-          t: +(val.duration * 1000).toFixed(3)
-        });
-      });
+    let parsedData: Pitch[] = (segments as []).map((val: any) => {
+      let ret: number[] = (val.pitches as number[])
+        .reduce((prev: PreCalcPitch[], curr: number, i: number) => {
+          prev.push({
+            p: curr,
+            t: this.getPeakValue(Math.abs(val.timbre[i]))
+          });
+          return prev;
+        }, [])
+        .sort((a: PreCalcPitch, b: PreCalcPitch) => a.p - b.p)
+        .map((val: PreCalcPitch) => val.t);
+
+      return {
+        d: ret,
+        s: val.start,
+        t: +(val.duration * 1000).toFixed(3)
+      };
+    });
 
     this.storage.set(this.uidTrackPitchKey, parsedData);
 
     parsedData.length = 0;
+    this.curveValues.length = 0;
   }
 
   /**
@@ -91,36 +96,62 @@ class AudioAnalysisService {
    * data so we can have a better visualization
    * when passed to the visualizer.
    *
-   * Example curve generation:
-   * const a = [0.025];
-   * const b = 5.75;
-   * for (let i = 0; i < 9; ++i) {
-   *   a.push(+(a[i] + (a[i ? i - 1 : 0] * b)).toFixed(3))
-   * }
-   *
-   * Output: [0.025, 0.169, 0.313, 1.285, 3.085, 10.474, 28.213, 88.439, 250.664, 759.188]
-   *
    * @private
    * @param {number} val
    * @returns {number}
    * @memberof AudioAnalysisService
    */
   private getPeakValue(val: number): number {
-    switch (true) {
-      case val > 501.85 || val < -501.85: return 10;
-      case val > 240.618 || val < -240.618: return 9;
-      case val > 116.103 || val < -116.103: return 8;
-      case val > 55.34 || val < -55.34: return 7;
-      case val > 27.006 || val < -27.006: return 6;
-      case val > 12.593 || val < -12.593: return 5;
-      case val > 6.406 || val < -6.406: return 4;
-      case val > 2.75 || val < -2.75: return 3;
-      case val > 1.625 || val < -1.625: return 2;
-      case val > 0.5 || val < -0.5: return 1;
-      default: return 0;
+    for (let i = 10; i > 0; --i) {
+      if (val > this.curveValues[i - 1]) {
+        return i;
+      }
     }
+
+    return 0;
+  }
+
+  /**
+   * Gets the largest absolute
+   * timbre value from the
+   * collection of segments.
+   *
+   * @private
+   * @param segments
+   * @returns {number}
+   */
+  private getMax(segments: any): number {
+    let ret = 0;
+
+    for (let i = 0, ii = segments.length; i < ii; ++i) {
+      const max = Math.max(
+        ...segments[i].timbre.map((t: number) => Math.abs(t))
+      );
+
+      ret = ret < max ? max : ret;
+    }
+
+    return ret;
+  }
+
+  /**
+   * Generates 10 points on
+   * an exponential curve,
+   * so we can map our timbre
+   * values against it.
+   *
+   * @private
+   * @returns {number}
+   */
+  private createCurveValues(): number[] {
+    const rangeCollection = [];
+    const d = 1.025 * Math.pow(this.maxValue, 0.1);
+    for (let i = 0, ii = 10; i < ii; ++i) {
+      rangeCollection.push(Math.pow(d, i));
+    }
+
+    return rangeCollection;
   }
 }
 
 export { AudioAnalysisService };
-
