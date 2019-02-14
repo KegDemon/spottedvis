@@ -4,6 +4,7 @@ import { Auth } from '../auth/auth';
 import { Storage } from '../utils';
 import { Visualizer } from '../visualizer';
 import { AudioAnalysisService } from './audioAnalysis.service';
+import { CurrentlyPlayingInterface } from '../interfaces/index';
 
 /**
  *
@@ -112,7 +113,7 @@ class PollingService {
    * @returns {void}
    * @memberof PollingService
    */
-  private parseData(data: any): void {
+  private parseData(data: CurrentlyPlayingInterface): void {
     if (data.currently_playing_type !== 'track') {
       return void 0;
     }
@@ -152,9 +153,9 @@ class PollingService {
    * @param {*} data
    * @memberof PollingService
    */
-  private nowPlayingTrack(data: any): void {
+  private nowPlayingTrack(data: CurrentlyPlayingInterface): void {
     if (this.nowPlayingEl) {
-      const artists = data.item.artists.reduce((acc: string, val: any, idx: number) => acc += idx === data.item.artists.length - 1 ? val.name : `${val.name}, `, '');
+      const artists = data.item.artists.reduce((acc, val, idx) => acc += idx === data.item.artists.length - 1 ? val.name : `${val.name}, `, '');
       this.nowPlayingEl.innerText = `${data.item.name} - ${artists}`;
     }
   }
@@ -173,8 +174,8 @@ class PollingService {
         'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
       }
     })
-      .then((data: Response): {} => data.json())
-      .then((data: any) => {
+      .then((data: Response) => data.json())
+      .then((data: CurrentlyPlayingInterface) => {
         this.parseData(data);
       })
       .catch((error: Error) => {
