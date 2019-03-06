@@ -118,7 +118,13 @@ class PollingService {
       return void 0;
     }
 
-    this.storage.set(this.uidProgressKey, +((data.progress_ms + +(performance.now() - this.timer).toFixed(3)) / 1000).toFixed(2));
+    this.storage.set(
+      this.uidProgressKey,
+      +(
+        (data.progress_ms + +(performance.now() - this.timer).toFixed(3)) /
+        1000
+      ).toFixed(2)
+    );
     this.storage.set(this.uidTrackDurationKey, data.item.duration_ms);
 
     if (data.is_playing && !this.visualizer.isActive()) {
@@ -138,11 +144,10 @@ class PollingService {
 
     this.nowPlayingTrack(data);
     this.storage.set(this.uidTrackIdKey, data.item.id);
-    this.audioAnalysis.get()
-    .then(() => {
-        this.getData();
-        this.visualizer.start();
-      });
+    this.audioAnalysis.get().then(() => {
+      this.getData();
+      this.visualizer.start();
+    });
   }
 
   /**
@@ -155,7 +160,12 @@ class PollingService {
    */
   private nowPlayingTrack(data: CurrentlyPlayingInterface): void {
     if (this.nowPlayingEl) {
-      const artists = data.item.artists.reduce((acc, val, idx) => acc += idx === data.item.artists.length - 1 ? val.name : `${val.name}, `, '');
+      const artists = data.item.artists.reduce(
+        (acc, val, idx) =>
+          (acc +=
+            idx === data.item.artists.length - 1 ? val.name : `${val.name}, `),
+        ''
+      );
       this.nowPlayingEl.innerText = `${data.item.name} - ${artists}`;
     }
   }
@@ -171,7 +181,7 @@ class PollingService {
     this.timer = performance.now();
     fetch(`${this.url}/me/player/currently-playing`, {
       headers: {
-        'Authorization': `Bearer ${this.storage.get(this.uidTokenKey)}`
+        Authorization: `Bearer ${this.storage.get(this.uidTokenKey)}`
       }
     })
       .then((data: Response) => data.json())
@@ -185,4 +195,3 @@ class PollingService {
 }
 
 export { PollingService };
-
