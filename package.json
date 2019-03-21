@@ -10,7 +10,7 @@
   "scripts": {
     "start": "webpack-dev-server --open",
     "watch": "webpack --watch",
-    "build": "webpack --mode production",
+    "build": "webpack --mode production --config webpack.config.prod.js",
     "server": "node server.js"
   },
   "devDependencies": {
