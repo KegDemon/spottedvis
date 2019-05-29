@@ -35,6 +35,7 @@ button {
   position: absolute;
   top: rem(16);
   transition: opacity 1s;
+  z-index: 1;
 
   &:hover {
     opacity: 1;
@@ -59,64 +60,18 @@ button {
 }
 
 .container {
-  left: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translateX(-50%) translateY(-50%);
+  position: relative;
+  padding: 0 32px;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
 
-  .vis {
-    align-items: flex-end;
-    display: flex;
-    flex: 1 1 100%;
-    justify-content: center;
-
-    &:nth-of-type(2){
-      margin-top: rem(4);
-      opacity: 0.3;
-
-      .overlay {
-        position: absolute;
-        background: linear-gradient(transparent, black);
-        height: 50%;
-        width: 100%;
-        z-index: 1;
-      }
-
-      >.node {
-        flex-direction: column;
-      }
-    }
-
-    > div.node {
-    align-items: center;
-    display: flex;
-    flex-direction: column-reverse;
-    width: rem(20);
-
-      div.cell {
-        background-color: #3ae43a;
-        border-radius: rem(1.5);
-        box-shadow: inset 0px 0px 6px 2px rgba(0,0,0,0.7);
-        display: block;
-        height: calc(80vh / 30);
-        margin-bottom: rem(4);
-        opacity: 1;
-        transition: opacity 200ms;
-        width: rem(12);
-
-        &:nth-of-type(n + 6) {
-          background-color: yellow;
-        }
-
-        &:nth-of-type(n + 9) {
-          background-color: red;
-        }
-
-        &.hidden {
-          opacity: 0;
-          transition: opacity 1s;
-        }
-      }
-    }
+  .node {
+    align-self: center;
+    background: red;
+    border-radius: rem(3);
+    height: rem(25);
+    width: rem(6);
+    margin: 0 rem(12);
   }
 }

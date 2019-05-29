@@ -1,5 +1,10 @@
 import * as config from '../../config';
-import { Pitch, PreCalcPitch, AudioAnalysisInterface, Segment } from '../interfaces';
+import {
+  Pitch,
+  PreCalcPitch,
+  AudioAnalysisInterface,
+  Segment
+} from '../interfaces';
 import { Storage } from '../utils';
 
 /**
@@ -66,17 +71,10 @@ class AudioAnalysisService {
     this.maxValue = this.getMax(segments);
     this.curveValues = this.createCurveValues();
 
-    let parsedData: Pitch[] = segments.map((val) => {
-      let ret: number[] = (val.pitches as number[])
-        .reduce((prev: PreCalcPitch[], curr, i) => {
-          prev.push({
-            p: curr,
-            t: this.getPeakValue(Math.abs(val.timbre[i]))
-          });
-          return prev;
-        }, [])
-        .sort((a: PreCalcPitch, b: PreCalcPitch) => a.p - b.p)
-        .map((val: PreCalcPitch) => val.t);
+    const parsedData: Pitch[] = segments.map(val => {
+      const ret: number[] = val.pitches.map((curr, i) =>
+        this.getPeakValue(Math.abs(val.timbre[i]) * curr)
+      );
 
       return {
         d: ret,
@@ -125,7 +123,9 @@ class AudioAnalysisService {
 
     for (let i = 0, ii = segments.length; i < ii; ++i) {
       const max = Math.max(
-        ...segments[i].timbre.map((t) => Math.abs(t))
+        ...segments[i].timbre.map(
+          (t, idx) => Math.abs(t) * segments[i].pitches[idx]
+        )
       );
 
       ret = ret < max ? max : ret;

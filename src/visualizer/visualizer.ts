@@ -1,5 +1,6 @@
-import * as config from '../../config';
+import anime from 'animejs';
 import EventEmitter from 'eventemitter3';
+import * as config from '../../config';
 import { Pitch } from '../interfaces';
 import { Storage } from '../utils';
 
@@ -38,15 +39,23 @@ class Visualizer {
    */
   private registerEventEmitters(): void {
     this.eventemitter.on('event:animation-start', this.start, this);
-    this.eventemitter.on('event:animation-update', (tick: number, pitches: Pitch[]) => {
-      if ( !this.isRunning ) {
-        this.stop();
-        return;
-      }
+    this.eventemitter.on(
+      'event:animation-update',
+      (tick: number, pitches: Pitch[]) => {
+        if (!this.isRunning) {
+          this.stop();
+          return;
+        }
 
-      clearTimeout(this.timeout);
-      this.timeout = setTimeout(this.playerAnimate.bind(this), pitches[tick].t, tick, pitches);
-    });
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(
+          this.playerAnimate.bind(this),
+          0,
+          tick,
+          pitches
+        );
+      }
+    );
   }
 
   /**
@@ -74,12 +83,16 @@ class Visualizer {
    * @private
    * @memberof Visualizer
    */
-  private tickSync = (tick: number, sync: number): number => sync > (tick + 5) || tick > (sync + 5) ? sync : tick;
+  private tickSync = (tick: number, sync: number): number =>
+    sync > tick + 5 || tick > sync + 5 ? sync : tick;
 
   private getSyncIndex(inputArray: any[]): number {
     const prog = this.storage.get(this.uidProgressKey) as number;
-    return inputArray.reduce((prev: number, curr: any, idx: number, ref: any) =>
-      Math.abs(curr.s - prog) < Math.abs(ref[prev].s - prog) ? idx : prev, 0)
+    return inputArray.reduce(
+      (prev: number, curr: any, idx: number, ref: any) =>
+        Math.abs(curr.s - prog) < Math.abs(ref[prev].s - prog) ? idx : prev,
+      0
+    );
   }
 
   /**
@@ -94,7 +107,7 @@ class Visualizer {
     this.stop();
     this.isRunning = true;
 
-    const pitches = this.storage.get(this.uidTrackPitchKey) as Pitch[] || [];
+    const pitches = (this.storage.get(this.uidTrackPitchKey) as Pitch[]) || [];
 
     if (!pitches.length) {
       this.stop();
@@ -107,7 +120,11 @@ class Visualizer {
       return;
     }
 
-    this.eventemitter.emit('event:animation-update', this.getSyncIndex(pitches), pitches);
+    this.eventemitter.emit(
+      'event:animation-update',
+      this.getSyncIndex(pitches),
+      pitches
+    );
   }
 
   /**
@@ -123,29 +140,26 @@ class Visualizer {
    */
   private playerAnimate(tick: number, pitches: Pitch[]): void {
     const syncTick = this.tickSync(tick, this.getSyncIndex(pitches));
-    const currentPitchRange: number[] = pitches[syncTick] ? pitches[syncTick].d : [];
+    const currentPitchRange: number[] = pitches[syncTick]
+      ? pitches[syncTick].d
+      : [];
     const nextTick = syncTick + 1;
 
-    for (let i = 0, ii = this.nodeCollection.length / 2; i < ii; ++i) {
-      for (let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
-        this.nodeCollection[i].children[z].classList[z >= currentPitchRange[i]
-            ? 'add'
-            : 'remove'
-          ]('hidden');
-
-        this.nodeCollection[i + 12].children[z].classList[z >= currentPitchRange[i]
-            ? 'add'
-            : 'remove'
-          ]('hidden');
-      }
-    }
+    anime({
+      complete: () => {
+        this.eventemitter.emit('event:animation-update', nextTick, pitches);
+      },
+      delay: 0,
+      duration: pitches[syncTick].t,
+      easing: `cubicBezier(0.65, 0, 0.03, 1)`,
+      height: (el: HTMLElement, i: number) => currentPitchRange[i] * 50 || 25,
+      loop: 0,
+      targets: this.nodeCollection
+    });
 
     if (!pitches[nextTick]) {
       this.stop();
-      return;
     }
-
-    this.eventemitter.emit('event:animation-update', nextTick, pitches);
   }
 
   /**
@@ -161,11 +175,14 @@ class Visualizer {
     this.timeoutStart = void 0;
     this.isRunning = false;
 
-    for (let i = 0, ii = this.nodeCollection.length; i < ii; ++i) {
-      for (let z = 0, zz = this.nodeCollection[i].children.length; z < zz; ++z) {
-        this.nodeCollection[i].children[z].classList.add('hidden');
-      }
-    }
+    anime({
+      delay: 0,
+      duration: 300,
+      easing: `cubicBezier(0.65, 0, 0.03, 1)`,
+      height: 25,
+      loop: 0,
+      targets: this.nodeCollection
+    });
   }
 
   /**
