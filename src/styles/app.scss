@@ -1,8 +1,9 @@
 @import 'utils';
 
-body, html {
+body,
+html {
   background-color: #000;
-  color: #FFF;
+  color: #fff;
   height: 100%;
   font-size: 16px;
   font-family: sans-serif;
@@ -27,7 +28,7 @@ button {
   background: none;
   border-radius: rem(4);
   border: rem(1) solid rgba(255, 255, 255, 0.4);
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
   font-weight: 200;
   opacity: 0.4;
@@ -70,7 +71,7 @@ button {
     flex: 1 1 100%;
     justify-content: center;
 
-    &:nth-of-type(2){
+    &:nth-of-type(2) {
       margin-top: rem(4);
       opacity: 0.3;
 
@@ -82,27 +83,43 @@ button {
         z-index: 1;
       }
 
-      >.node {
+      > .node {
         flex-direction: column;
       }
     }
 
     > div.node {
-    align-items: center;
-    display: flex;
-    flex-direction: column-reverse;
-    width: rem(20);
+      align-items: center;
+      display: flex;
+      flex-direction: column-reverse;
+      width: rem(20);
 
       div.cell {
         background-color: #3ae43a;
+        backface-visibility: hidden;
         border-radius: rem(1.5);
-        box-shadow: inset 0px 0px 6px 2px rgba(0,0,0,0.7);
+        box-shadow: inset 0px 0px 6px 2px rgba(0, 0, 0, 0.7);
         display: block;
         height: calc(80vh / 30);
         margin-bottom: rem(4);
         opacity: 1;
+        perspective: 1000;
+        transform: translateZ(0);
         transition: opacity 200ms;
         width: rem(12);
+
+        -webkit-transform: translateZ(0);
+        -moz-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        -o-transform: translateZ(0);
+
+        -webkit-backface-visibility: hidden;
+        -moz-backface-visibility: hidden;
+        -ms-backface-visibility: hidden;
+
+        -webkit-perspective: 1000;
+        -moz-perspective: 1000;
+        -ms-perspective: 1000;
 
         &:nth-of-type(n + 6) {
           background-color: yellow;

@@ -71,7 +71,7 @@ class AudioAnalysisService {
         .reduce((prev: PreCalcPitch[], curr, i) => {
           prev.push({
             p: curr,
-            t: this.getPeakValue(Math.abs(val.timbre[i]))
+            t: this.getPeakValue(val.timbre[i] < 0 ? val.timbre[i] / -5 : val.timbre[i])
           });
           return prev;
         }, [])
@@ -125,7 +125,7 @@ class AudioAnalysisService {
 
     for (let i = 0, ii = segments.length; i < ii; ++i) {
       const max = Math.max(
-        ...segments[i].timbre.map((t) => Math.abs(t))
+        ...segments[i].timbre.map((t) => t < 0 ? t / -5 : t)
       );
 
       ret = ret < max ? max : ret;
