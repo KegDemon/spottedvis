@@ -94,7 +94,7 @@ class Visualizer {
     this.stop();
     this.isRunning = true;
 
-    const pitches = this.storage.get(this.uidTrackPitchKey) as Pitch[] || [];
+    const pitches = this.storage.get<Pitch[]>(this.uidTrackPitchKey) || [];
 
     if (!pitches.length) {
       this.stop();

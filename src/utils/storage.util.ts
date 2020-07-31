@@ -7,7 +7,7 @@ class Storage {
     return void 0;
   }
 
-  public get(key: string = ''): string | number | object {
+  public get<T extends string | object | number>(key: string = ''): T {
     const storedKey = this.storage.getItem(key) || '';
 
     return storedKey ? JSON.parse(storedKey) : '';
